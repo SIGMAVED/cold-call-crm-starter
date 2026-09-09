@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Cold Call Dialer",
+  "version": "1.0.0",
+  "description": "Click-to-call softphone with live Deepgram transcription, wired into the Cold Call CRM.",
+  "action": {
+    "default_title": "Open Dialer"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "permissions": ["storage", "downloads", "sidePanel"],
+  "host_permissions": ["http://localhost:4001/*"]
+}

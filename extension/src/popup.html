@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Cold Call Dialer</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="status">
+        <span id="statusDot" class="dot ready"></span>
+        <span id="statusText">Ready</span>
+      </div>
+      <div class="topbar-actions">
+        <label class="ring-toggle" title="Record this call's audio on Twilio (transcripts are always saved regardless)">
+          <input type="checkbox" id="recToggle" />
+          <span>Rec</span>
+        </label>
+        <label class="ring-toggle">
+          <input type="checkbox" id="ringToggle" checked />
+          <span>Ring</span>
+        </label>
+      </div>
+    </header>
+
+    <div id="micBanner" class="mic-banner hidden">
+      <span>Microphone permission needed for calls.</span>
+      <button id="micFixBtn" class="mic-fix-btn">Fix &rarr;</button>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="autodial">Auto-dial</button>
+      <button class="tab" data-tab="keypad">Keypad</button>
+      <button class="tab" data-tab="recents">Recents</button>
+      <button class="tab" data-tab="inbox">Inbox</button>
+    </nav>
+
+    <main id="tabPanels">
+      <section id="panel-autodial" class="panel active">
+        <label class="field-label" for="queueInput">Paste numbers</label>
+        <p class="hint">One per line. Optional label after a comma. Invalid lines and DNC numbers are skipped.</p>
+        <button id="loadCrmBtn" class="btn btn-primary btn-block hidden" style="margin-bottom: 10px"></button>
+      <textarea id="queueInput" rows="4" placeholder="+1 415 555 1212, Jane Doe&#10;+44 20 7946 0958, ACME contact"></textarea>
+        <button id="addToQueueBtn" class="btn btn-block" disabled>Add 0 to queue</button>
+
+        <ol id="queueList" class="queue-list"></ol>
+
+        <div class="progress-row">
+          <span id="progressLabel">Progress: 0/0</span>
+          <span id="targetLabel" class="target-label"></span>
+        </div>
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+
+        <div id="upNext" class="up-next hidden">
+          <span class="up-next-label">UP NEXT</span>
+          <span id="upNextNumber"></span>
+        </div>
+
+        <div class="autodial-row">
+          <label class="autodial-toggle">
+            <input type="checkbox" id="autoDialToggle" /> Auto-dial the queue
+          </label>
+          <span id="autoDialCountdown" class="autodial-countdown hidden"></span>
+        </div>
+
+        <div class="queue-actions">
+          <button id="callNextBtn" class="btn btn-primary" disabled>Call next</button>
+          <button id="pauseBtn" class="btn hidden">Pause</button>
+          <button id="skipBtn" class="btn" disabled>Skip</button>
+          <button id="clearBtn" class="btn btn-danger-text" disabled>Clear</button>
+        </div>
+      </section>
+
+      <section id="panel-keypad" class="panel">
+        <input id="keypadDisplay" class="keypad-display" type="text" placeholder="Enter a number" />
+        <div class="keypad-grid">
+          <button class="key" data-digit="1">1</button>
+          <button class="key" data-digit="2">2</button>
+          <button class="key" data-digit="3">3</button>
+          <button class="key" data-digit="4">4</button>
+          <button class="key" data-digit="5">5</button>
+          <button class="key" data-digit="6">6</button>
+          <button class="key" data-digit="7">7</button>
+          <button class="key" data-digit="8">8</button>
+          <button class="key" data-digit="9">9</button>
+          <button class="key" data-digit="*">*</button>
+          <button class="key" data-digit="0">0</button>
+          <button class="key" data-digit="#">#</button>
+        </div>
+        <button id="keypadCallBtn" class="btn btn-primary btn-block">Call</button>
+      </section>
+
+      <section id="panel-recents" class="panel">
+        <ul id="recentsList" class="recents-list"></ul>
+      </section>
+
+      <section id="panel-inbox" class="panel">
+        <ul id="inboxList" class="recents-list"></ul>
+      </section>
+    </main>
+
+    <div id="incomingOverlay" class="call-overlay incoming hidden">
+      <div class="incoming-badge">INCOMING CALL</div>
+      <div id="incomingNumber" class="call-number"></div>
+      <div id="incomingLeadName" class="call-lead"></div>
+      <div class="incoming-actions">
+        <button id="rejectBtn" class="btn btn-danger btn-block">Decline</button>
+        <button id="answerBtn" class="btn btn-accept btn-block">Answer</button>
+      </div>
+    </div>
+
+    <div id="callOverlay" class="call-overlay hidden">
+      <div class="call-header">
+        <div>
+          <div id="callNumber" class="call-number"></div>
+          <div id="callLeadName" class="call-lead"></div>
+        </div>
+        <div id="callTimer" class="call-timer">00:00</div>
+      </div>
+      <div id="callState" class="call-state">Calling…</div>
+
+      <div id="transcriptPanel" class="transcript-panel"></div>
+
+      <div id="inCallKeypad" class="in-call-keypad hidden">
+        <div id="sentDigits" class="sent-digits"></div>
+        <div class="keypad-grid compact">
+          <button class="key call-key" data-digit="1">1</button>
+          <button class="key call-key" data-digit="2">2</button>
+          <button class="key call-key" data-digit="3">3</button>
+          <button class="key call-key" data-digit="4">4</button>
+          <button class="key call-key" data-digit="5">5</button>
+          <button class="key call-key" data-digit="6">6</button>
+          <button class="key call-key" data-digit="7">7</button>
+          <button class="key call-key" data-digit="8">8</button>
+          <button class="key call-key" data-digit="9">9</button>
+          <button class="key call-key" data-digit="*">*</button>
+          <button class="key call-key" data-digit="0">0</button>
+          <button class="key call-key" data-digit="#">#</button>
+        </div>
+      </div>
+
+      <div id="inCallActions" class="call-actions">
+        <div class="call-actions-row">
+          <button id="keypadToggleBtn" class="btn">Keypad</button>
+          <button id="muteBtn" class="btn">Mute</button>
+        </div>
+        <button id="hangupBtn" class="btn btn-danger btn-block">End Call</button>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

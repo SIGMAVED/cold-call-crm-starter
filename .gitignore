@@ -1,0 +1,19 @@
+node_modules/
+dist/
+# The recursive **/ forms matter: the old plain `server/db/*.sqlite` pattern
+# only matched files directly in server/db/, not backups/**/*.sqlite or
+# db.bak-* snapshots one level down or with a different suffix — that gap is
+# exactly how real database backups (with real customer data) ended up
+# committed to this repo's history before it was cleaned. Don't narrow these
+# back down without checking every existing backup-naming convention first.
+server/db/**/*.sqlite*
+server/db/*.bak-*
+server/db/backtest/
+server/.env
+extension/dist/
+transcripts/
+logs/
+*.csv
+*.xlsx
+brain.md
+brain-digest.md

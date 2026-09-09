@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Microphone access — Cold Call Dialer</title>
+  <link rel="stylesheet" href="popup.css" />
+  <style>
+    body { min-width: 0; display: flex; align-items: center; justify-content: center; }
+    .card { max-width: 460px; padding: 32px; text-align: center; }
+    h1 { font-size: 18px; }
+    #status { margin-top: 12px; font-size: 14px; color: var(--muted); }
+    #status.ok { color: var(--success); font-weight: 600; }
+    #status.blocked { color: var(--danger); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Microphone access</h1>
+    <p>The dialer needs your microphone so the person you call can hear you.</p>
+    <div id="status">Waiting for the permission prompt — click <b>Allow</b> when Chrome asks.</div>
+    <button id="retryBtn" class="btn btn-primary btn-block hidden">Try again</button>
+  </div>
+  <script src="permission.js"></script>
+</body>
+</html>
